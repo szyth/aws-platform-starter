@@ -1,0 +1,5 @@
+bucket       = "tfstate-<ACCOUNT_ID>-ap-south-1" # output of the bootstrap stack
+key          = "envs/dev/terraform.tfstate"
+region       = "ap-south-1"
+encrypt      = true
+use_lockfile = true # native S3 locking; no DynamoDB table needed on Terraform >= 1.10
