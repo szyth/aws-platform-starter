@@ -1,3 +1,4 @@
 github_repo         = "your-github-user/aws-platform-starter"
 state_bucket_name   = "tfstate-<ACCOUNT_ID>-ap-south-1"
 public_access_cidrs = ["<YOUR_PUBLIC_IP>/32"]
+app_github_repo     = "your-github-user/rust-backend-starter"

@@ -39,3 +39,8 @@ variable "state_bucket_name" {
   description = "State bucket created by the bootstrap stack."
   type        = string
 }
+
+variable "app_github_repo" {
+  description = "Application repo whose CI may push images to ECR, in owner/name form."
+  type        = string
+}
