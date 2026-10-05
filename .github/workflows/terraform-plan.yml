@@ -42,3 +42,4 @@ jobs:
           -var="github_repo=${{ github.repository }}"
           -var="state_bucket_name=${{ vars.TF_STATE_BUCKET }}"
           -var="app_github_repo=${{ github.repository_owner }}/rust-backend-starter"
+          -var="github_owner_id=${{ github.repository_owner_id }}"
