@@ -4,7 +4,17 @@ data "aws_availability_zones" "available" {
 
 locals {
   name = "${var.project}-dev"
-  azs  = slice(data.aws_availability_zones.available.names, 0, 2)
+
+  # GitHub OIDC "sub" claims now embed immutable IDs:
+  #   repo:<owner>@<owner_id>/<repo>@<repo_id>:<context>
+  # (seen in CloudTrail on a rejected AssumeRoleWithWebIdentity). Trust that format with the
+  # owner ID pinned, plus the older name-only format.
+  gh_owner         = split("/", var.github_repo)[0]
+  platform_repo    = split("/", var.github_repo)[1]
+  app_repo         = split("/", var.app_github_repo)[1]
+  platform_sub_ids = "repo:${local.gh_owner}@${var.github_owner_id}/${local.platform_repo}@*"
+  app_sub_ids      = "repo:${local.gh_owner}@${var.github_owner_id}/${local.app_repo}@*"
+  azs              = slice(data.aws_availability_zones.available.names, 0, 2)
 }
 
 module "vpc" {
@@ -32,6 +42,8 @@ module "github_oidc" {
 
   state_bucket_name = var.state_bucket_name
   allowed_subjects = [
+    "${local.platform_sub_ids}:pull_request",
+    "${local.platform_sub_ids}:ref:refs/heads/main",
     "repo:${var.github_repo}:pull_request",
     "repo:${var.github_repo}:ref:refs/heads/main",
   ]
@@ -43,7 +55,10 @@ module "ecr" {
   repository_name          = "rust-backend-starter"
   github_oidc_provider_arn = module.github_oidc.provider_arn
   # only merges to main may publish images; PRs build but don't push
-  push_subjects = ["repo:${var.app_github_repo}:ref:refs/heads/main"]
+  push_subjects = [
+    "${local.app_sub_ids}:ref:refs/heads/main",
+    "repo:${var.app_github_repo}:ref:refs/heads/main",
+  ]
 }
 
 module "rds" {

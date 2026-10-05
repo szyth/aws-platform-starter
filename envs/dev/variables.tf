@@ -50,3 +50,8 @@ variable "app_github_repo" {
   description = "Application repo whose CI may push images to ECR, in owner/name form."
   type        = string
 }
+
+variable "github_owner_id" {
+  description = "Numeric ID of the GitHub owner (user/org); GitHub OIDC sub claims include it."
+  type        = string
+}
