@@ -24,6 +24,12 @@ variable "cluster_version" {
   default = "1.34"
 }
 
+variable "node_instance_types" {
+  description = "EKS worker instance types. New AWS accounts on the Free plan only allow free-tier eligible types (e.g. c7i-flex.large, not t3.medium)."
+  type        = list(string)
+  default     = ["c7i-flex.large"]
+}
+
 variable "public_access_cidrs" {
   description = "Who may reach the EKS API endpoint. Set to [\"<your-ip>/32\"]."
   type        = list(string)
