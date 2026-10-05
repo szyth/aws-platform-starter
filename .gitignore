@@ -14,11 +14,3 @@ terraform.tfvars
 # Editor / OS
 .vscode/
 .DS_Store
-
-# Personal Claude Code context
-CLAUDE.local.md
-
-# Personal interview prep
-DEMO_STORY.md
-TERRAFORM_INTERVIEW_QUESTIONS.md
-AWS_Interview_2Day_Plan.docx
