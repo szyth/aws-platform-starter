@@ -55,3 +55,38 @@ module "rds" {
   allowed_security_groups = { eks_nodes = module.eks.node_security_group_id }
   db_name                 = "app"
 }
+
+# ---- Continuous deployment: let the app repo's CI role deploy into the cluster ----
+# AWS side: find the cluster (update-kubeconfig needs DescribeCluster).
+data "aws_iam_policy_document" "app_ci_eks" {
+  statement {
+    actions   = ["eks:DescribeCluster"]
+    resources = [module.eks.cluster_arn]
+  }
+}
+
+resource "aws_iam_role_policy" "app_ci_eks" {
+  name   = "eks-describe"
+  role   = split("/", module.ecr.push_role_arn)[1]
+  policy = data.aws_iam_policy_document.app_ci_eks.json
+}
+
+# Kubernetes side: an EKS access entry maps the IAM role into the cluster with
+# "edit" rights in the default namespace only (enough for helm upgrade).
+resource "aws_eks_access_entry" "app_ci" {
+  cluster_name  = module.eks.cluster_name
+  principal_arn = module.ecr.push_role_arn
+}
+
+resource "aws_eks_access_policy_association" "app_ci" {
+  cluster_name  = module.eks.cluster_name
+  principal_arn = module.ecr.push_role_arn
+  policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSEditPolicy"
+
+  access_scope {
+    type       = "namespace"
+    namespaces = ["default"]
+  }
+
+  depends_on = [aws_eks_access_entry.app_ci]
+}
